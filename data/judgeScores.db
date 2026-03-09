@@ -1,0 +1,4 @@
+{"$$indexCreated":{"fieldName":"judge_id","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"project_id","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"judge_id"}}
+{"$$indexCreated":{"fieldName":"project_id"}}

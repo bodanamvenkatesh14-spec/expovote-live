@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard – ExpoVote Live</title>
+    <meta name="description" content="Live leaderboard showing final rankings of expo projects." />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 1.25rem;
+            margin: 2rem 0 3rem;
+            flex-wrap: wrap;
+        }
+
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 200px;
+            text-align: center;
+        }
+
+        .podium-medal {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .podium-medal-2 {
+            animation-delay: 0.5s;
+        }
+
+        .podium-medal-3 {
+            animation-delay: 1s;
+        }
+
+        .podium-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+        }
+
+        .podium-team {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .podium-score {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .podium-block {
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .podium-block-1 {
+            height: 100px;
+            background: var(--gradient-gold);
+            box-shadow: 0 -4px 20px rgba(245, 166, 35, 0.3);
+        }
+
+        .podium-block-2 {
+            height: 70px;
+            background: var(--gradient-silver);
+            box-shadow: 0 -4px 16px rgba(142, 155, 174, 0.3);
+        }
+
+        .podium-block-3 {
+            height: 50px;
+            background: var(--gradient-bronze);
+            box-shadow: 0 -4px 14px rgba(196, 125, 58, 0.25);
+        }
+
+        .lb-list {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .lb-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lb-score-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <span class="logo-icon">🗳️</span> ExpoVote Live
+        </a>
+        <div class="navbar-logo-center">
+            <img src="/images/ainnovate-logo.png" alt="A INNOVATE">
+        </div>
+        <div class="navbar-links">
+            <a href="/vote" id="nav-vote">Vote</a>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="page-wrapper">
+        <div class="container">
+
+            <!-- HERO -->
+            <div class="page-hero">
+                <span class="hero-icon">🏆</span>
+                <h1>Project <span class="gradient-text">Leaderboard</span></h1>
+                <p>Final rankings of all expo projects based on audience votes and judges' marks.</p>
+            </div>
+
+            <!-- LOADING -->
+            <div id="loading-state"
+                style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem;">
+                <div class="spinner"></div>
+                <p style="color:var(--text-muted);">Loading leaderboard…</p>
+            </div>
+
+            <!-- WAITING STATE -->
+            <div id="waiting-state" style="display:none;">
+                <div class="leaderboard-waiting">
+                    <span class="wait-icon">⏳</span>
+                    <h2>Results Not Yet Published</h2>
+                    <p>The admin hasn't declared the winner yet. Stay tuned! Once the admin clicks "Declare Winner", the
+                        full leaderboard will appear here in real time.</p>
+                    <div
+                        style="margin-top:2rem;display:flex;align-items:center;justify-content:center;gap:0.65rem;color:var(--text-muted);font-size:0.9rem;">
+                        <span class="status-dot active"></span> Live – Updating automatically
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEADERBOARD CONTENT -->
+            <div id="leaderboard-content" style="display:none;">
+
+                <!-- TOP 3 PODIUM -->
+                <div id="podium-section" style="display:none;">
+                    <div style="text-align:center;margin-bottom:1rem;">
+                        <span class="badge badge-warning" style="font-size:0.85rem;padding:0.4rem 1.2rem;">🏆 Top 3
+                            Winners</span>
+                    </div>
+                    <div class="podium" id="podium"></div>
+                    <div style="height:1px;background:var(--border);margin-bottom:2.5rem;"></div>
+                </div>
+
+                <!-- FULL LIST -->
+                <div class="lb-list" id="lb-list">
+                    <div class="lb-section-title">📋 Full Rankings</div>
+                    <div id="lb-rows"></div>
+                </div>
+
+                <div style="text-align:center;padding:2rem 0 3rem;color:var(--text-muted);font-size:0.85rem;">
+                    <div
+                        style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.35rem;">
+                        <span class="status-dot active"></span> Results are final · Score = (Votes × 30%) + (Judge Marks
+                        × 70%)
+                    </div>
+                    <div>Vote scores and judge marks are hidden · Only final scores are displayed.</div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function toast(msg, type = 'info', duration = 5000) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => { el.style.animation = 'slideInRight 0.3s ease-out reverse'; setTimeout(() => el.remove(), 350); }, duration);
+        }
+
+        function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+        function getMedalEmoji(rank) {
+            if (rank === 1) return '🥇'; if (rank === 2) return '🥈'; if (rank === 3) return '🥉';
+            return null;
+        }
+
+        function renderPodium(top3) {
+            if (!top3 || top3.length < 1) return;
+            const section = document.getElementById('podium-section');
+            const container = document.getElementById('podium');
+            // Order: 2nd, 1st, 3rd for visual podium
+            const ordered = [];
+            if (top3[1]) ordered.push({ ...top3[1], pos: 2 });
+            if (top3[0]) ordered.push({ ...top3[0], pos: 1 });
+            if (top3[2]) ordered.push({ ...top3[2], pos: 3 });
+
+            container.innerHTML = '';
+            ordered.forEach(p => {
+                const color = p.pos === 1 ? 'var(--gold)' : p.pos === 2 ? 'var(--silver)' : 'var(--bronze)';
+                const blockClass = `podium-block podium-block-${p.pos}`;
+                const medalClass = `podium-medal${p.pos > 1 ? ' podium-medal-' + p.pos : ''}`;
+                const item = document.createElement('div');
+                item.className = 'podium-item';
+                item.innerHTML = `
+        <div class="${medalClass}">${getMedalEmoji(p.pos)}</div>
+        <div class="podium-name">${esc(p.project_name)}</div>
+        <div class="podium-team">${esc(p.team_name || '')}</div>
+        <div class="podium-score" style="color:${color};">${p.final_score.toFixed(2)}</div>
+        <div class="${blockClass}">#${p.rank}</div>`;
+                container.appendChild(item);
+            });
+            section.style.display = 'block';
+        }
+
+        function renderLeaderboard(scores) {
+            const container = document.getElementById('lb-rows');
+            container.innerHTML = '';
+            const maxScore = scores.length > 0 ? scores[0].final_score : 100;
+
+            scores.forEach((p, i) => {
+                const rankClass = i === 0 ? 'rank-top-1' : i === 1 ? 'rank-top-2' : i === 2 ? 'rank-top-3' : '';
+                const rankBadgeClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+                const medal = getMedalEmoji(p.rank);
+                const barWidth = maxScore > 0 ? ((p.final_score / maxScore) * 100).toFixed(1) : '0';
+                const row = document.createElement('div');
+                row.className = `leaderboard-row ${rankClass}`;
+                row.style.animationDelay = (i * 0.06) + 's';
+                row.innerHTML = `
+        <div class="rank-badge ${rankBadgeClass}">${medal || p.rank}</div>
+        <div class="lb-project-info">
+          <div class="lb-project-name">${esc(p.project_name)}</div>
+          <div class="lb-team-name">${esc(p.team_name || '')}</div>
+          <div class="score-bar-wrap mt-1">
+            <div class="score-bar-track">
+              <div class="score-bar-fill" style="width:0%" data-width="${barWidth}%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="lb-score-col">
+          <div class="lb-score-value">${p.final_score.toFixed(2)}</div>
+          <div class="lb-score-label">/ 100 pts</div>
+        </div>`;
+                container.appendChild(row);
+            });
+
+            // Animate score bars
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+                        bar.style.width = bar.dataset.width;
+                    });
+                });
+            });
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch('/api/admin/status');
+                const data = await res.json();
+
+                document.getElementById('loading-state').style.display = 'none';
+
+                if (!data.winner_declared || !data.final_scores || data.final_scores.length === 0) {
+                    document.getElementById('waiting-state').style.display = 'block';
+                    return;
+                }
+
+                const scores = data.final_scores;
+                document.getElementById('leaderboard-content').style.display = 'block';
+                renderPodium(scores.slice(0, 3));
+                renderLeaderboard(scores);
+
+            } catch (e) {
+                document.getElementById('loading-state').innerHTML =
+                    '<p style="color:var(--danger);">Failed to load leaderboard. Please refresh.</p>';
+            }
+        }
+
+        // Socket: real-time winner declared
+        socket.on('winner_declared', (data) => {
+            toast('🏆 Results are now live!', 'success', 6000);
+            if (data && data.leaderboard) {
+                document.getElementById('waiting-state').style.display = 'none';
+                document.getElementById('leaderboard-content').style.display = 'block';
+                renderPodium(data.leaderboard.slice(0, 3));
+                renderLeaderboard(data.leaderboard);
+            } else {
+                setTimeout(() => location.reload(), 1500);
+            }
+        });
+
+        socket.on('voting_started', () => {
+            document.getElementById('waiting-state').style.display = 'block';
+            document.getElementById('leaderboard-content').style.display = 'none';
+        });
+
+        // Request latest leaderboard data
+        socket.on('connect', () => socket.emit('request_leaderboard'));
+        socket.on('leaderboard_data', (data) => {
+            if (data.winner_declared && data.final_scores && data.final_scores.length > 0) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('waiting-state').style.display = 'none';
+                document.getElementById('leaderboard-content').style.display = 'block';
+                renderPodium(data.final_scores.slice(0, 3));
+                renderLeaderboard(data.final_scores);
+            }
+        });
+
+        loadLeaderboard();
+    </script>
+</body>
+
+</html>

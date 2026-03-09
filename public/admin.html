@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard – ExpoVote Live</title>
+    <meta name="description" content="ExpoVote Live Administrative Dashboard and Management Panel." />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+        /* Admin specific fixes */
+        .admin-layout {
+            background: var(--bg-page);
+        }
+
+        .stat-card {
+            border-top: 4px solid var(--primary);
+        }
+
+        .stat-card.stat-success {
+            border-top-color: var(--success);
+        }
+
+        .stat-card.stat-warning {
+            border-top-color: var(--warning);
+        }
+
+        .stat-card.stat-danger {
+            border-top-color: var(--danger);
+        }
+
+        .panel-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .panel-section.active {
+            display: block;
+        }
+
+        /* Vote Feed Fixes */
+        .vote-feed {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar" style="border-bottom:1px solid var(--border); box-shadow:var(--shadow-sm);">
+        <a href="/" class="navbar-brand">
+            <span class="logo-icon">🛡️</span> Admin Panel
+        </a>
+        <div class="navbar-logo-center">
+            <img src="/images/ainnovate-logo.png" alt="A INNOVATE">
+        </div>
+        <div class="navbar-links">
+            <span id="admin-user-info"
+                style="font-size:0.85rem;font-weight:600;margin-right:1rem;color:var(--text-muted);"></span>
+            <a href="/" target="_blank" style="background:var(--bg-subtle);">👁️ View Live Vote</a>
+            <button class="btn btn-sm btn-outline" onclick="logout()" style="padding:0.35rem 0.75rem;">Logout</button>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="admin-layout">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <button class="sidebar-link active" data-target="panel-overview">
+                    <span class="link-icon">📊</span> Overview
+                </button>
+                <button class="sidebar-link" data-target="panel-projects">
+                    <span class="link-icon">📁</span> Projects
+                </button>
+                <button class="sidebar-link" data-target="panel-judges">
+                    <span class="link-icon">⚖️</span> Judges
+                </button>
+                <button class="sidebar-link" data-target="panel-feed">
+                    <span class="link-icon">⚡</span> Feed
+                </button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-link" data-target="panel-settings">
+                    <span class="link-icon">⚙️</span> Settings
+                </button>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-content">
+
+            <!-- OVERVIEW PANEL -->
+            <section id="panel-overview" class="panel-section active">
+                <div class="section-header">
+                    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;">Dashboard Overview
+                    </h2>
+                    <div id="dashboard-status-badge" class="badge badge-muted">Checking status...</div>
+                </div>
+
+                <!-- Quick Control Buttons -->
+                <div class="card mb-4" style="background:linear-gradient(to right, #F8FAFC, #F1F5F9); border:none;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                        <h3 class="section-title" style="margin-bottom:0;font-size:1rem;">Voting Controls</h3>
+                        <button class="btn btn-sm" onclick="resetSystem()"
+                            style="background:rgba(239, 68, 68, 0.1);color:#DC2626;border:1px solid rgba(239, 68, 68, 0.25);">
+                            🔄 Restart Event (Clear All Votes)
+                        </button>
+                    </div>
+                    <div class="control-panel">
+                        <button class="control-btn control-btn-start" id="btn-start" onclick="toggleVoting(true)">
+                            <span class="ctrl-icon">🟢</span>
+                            <span class="ctrl-label">Start Voting</span>
+                        </button>
+                        <button class="control-btn control-btn-stop" id="btn-stop" onclick="toggleVoting(false)">
+                            <span class="ctrl-icon">🔴</span>
+                            <span class="ctrl-label">Stop Voting</span>
+                        </button>
+                        <button class="control-btn control-btn-declare" id="btn-declare" onclick="declareWinner()">
+                            <span class="ctrl-icon">🏆</span>
+                            <span class="ctrl-label">Declare Winner</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-3 mb-4">
+                    <div class="stat-card">
+                        <div class="flex-between">
+                            <span class="stat-label">Total Projects</span>
+                            <span class="stat-icon" style="color:var(--primary);">📁</span>
+                        </div>
+                        <div class="stat-value" id="stat-projects">0</div>
+                    </div>
+                    <div class="stat-card stat-success">
+                        <div class="flex-between">
+                            <span class="stat-label">Total Votes Cast</span>
+                            <span class="stat-icon" style="color:var(--success);">❤️</span>
+                        </div>
+                        <div class="stat-value" id="stat-votes">0</div>
+                    </div>
+                    <div class="stat-card stat-warning">
+                        <div class="flex-between">
+                            <span class="stat-label">Unique Voters</span>
+                            <span class="stat-icon" style="color:var(--warning);">👥</span>
+                        </div>
+                        <div class="stat-value" id="stat-voters">0</div>
+                    </div>
+                </div>
+
+                <!-- Live Preview Table (top 5 by votes) -->
+                <div class="card">
+                    <h3 class="section-title">Current Leading Projects (Based on unweighted votes)</h3>
+                    <div class="table-wrap">
+                        <table class="table" id="table-overview">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Project Name</th>
+                                    <th>Category</th>
+                                    <th style="text-align:right;">Raw Votes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted p-3">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROJECTS PANEL -->
+            <section id="panel-projects" class="panel-section">
+                <div class="section-header">
+                    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;">Project Management
+                    </h2>
+                    <button class="btn btn-primary btn-sm" onclick="openProjectModal()">+ Add Project</button>
+                </div>
+
+                <div class="card p-0">
+                    <div class="table-wrap" style="border:none;box-shadow:none;">
+                        <table class="table" id="table-projects">
+                            <thead>
+                                <tr>
+                                    <th>Project Name & Team</th>
+                                    <th>Category</th>
+                                    <th>Raw Votes</th>
+                                    <th>Judge Scores</th>
+                                    <th>Final Score</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- JUDGES PANEL -->
+            <section id="panel-judges" class="panel-section">
+                <div class="section-header">
+                    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;">Judges & Scoring</h2>
+                    <button class="btn btn-outline btn-sm" onclick="openJudgeModal()">+ Add Judge</button>
+                </div>
+
+                <div class="grid grid-2 gap-3 mb-4">
+                    <!-- Add Judge Card -->
+                    <div class="card">
+                        <h3 class="section-title" style="margin-bottom:1rem;font-size:1rem;">Add New Judge</h3>
+                        <form id="add-judge-form" onsubmit="submitJudgeRegistration(event)">
+                            <div class="form-group mb-2">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="j-name" class="form-control" required
+                                    placeholder="e.g. Dr. Jane Doe">
+                            </div>
+                            <div class="form-group mb-2">
+                                <label class="form-label">Username</label>
+                                <input type="text" id="j-user" class="form-control" required placeholder="e.g. jane_d">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" id="j-pass" class="form-control" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Create Judge Account</button>
+                        </form>
+                    </div>
+
+                    <!-- List Judges -->
+                    <div class="card p-0">
+                        <div class="table-wrap" style="border:none;box-shadow:none;">
+                            <table class="table" id="table-judges">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Username</th>
+                                        <th style="text-align:right;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FEED PANEL -->
+            <section id="panel-feed" class="panel-section">
+                <div class="section-header">
+                    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;">Live Voting Feed</h2>
+                </div>
+                <div class="card">
+                    <div class="vote-feed" id="live-feed">
+                        <div class="text-center text-muted p-3">Waiting for votes...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS PANEL -->
+            <section id="panel-settings" class="panel-section">
+                <div class="section-header">
+                    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;">System Settings</h2>
+                </div>
+                <div class="card mb-4" style="border-left:4px solid var(--danger);">
+                    <h3 class="mb-2" style="color:var(--danger);font-size:1.1rem;">Danger Zone</h3>
+                    <p class="text-secondary mb-3" style="font-size:0.9rem;">Resetting the system will permanently
+                        delete all votes and judge scores, and set all project vote counts to zero. Projects and Judges
+                        will NOT be deleted.</p>
+                    <button class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);"
+                        onclick="resetSystem()">⚠️ Hard Reset System Database</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Add/Edit Project Modal -->
+    <div class="modal-overlay" id="project-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="p-modal-title">Add Project</h2>
+                <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
+            </div>
+            <form id="project-form" onsubmit="saveProject(event)">
+                <input type="hidden" id="p-id">
+                <div class="form-group">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" id="p-name" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Team/Student Name(s)</label>
+                        <input type="text" id="p-team" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <input type="text" id="p-category" class="form-control" placeholder="e.g. AI/ML, IoT">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea id="p-desc" class="form-control" rows="3"></textarea>
+                </div>
+                <div style="display:flex;gap:1rem;margin-top:1.5rem;">
+                    <button type="button" class="btn btn-ghost btn-full"
+                        onclick="closeModal('project-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-full" id="p-submit-btn">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        /* ============================================================
+           ADMIN LOGIN & AUTH
+           ============================================================ */
+        const ADMIN_TOKEN = localStorage.getItem('evl_token');
+        if (!ADMIN_TOKEN) { window.location.href = '/admin/login'; }
+
+        const authHeaders = {
+            'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/verify', { headers: authHeaders });
+                const data = await res.json();
+                if (!data.success || data.role !== 'admin') { throw new Error('Unauthorized'); }
+                document.getElementById('admin-user-info').textContent = `Hi, Admin (${data.username})`;
+            } catch {
+                localStorage.removeItem('evl_token');
+                window.location.href = '/admin/login';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('evl_token');
+            window.location.href = '/admin/login';
+        }
+
+        /* ============================================================
+           UI HELPERS
+           ============================================================ */
+        function toast(msg, type = 'info', duration = 4000) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => {
+                el.style.animation = 'slideInRight 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) reverse';
+                setTimeout(() => el.remove(), 350);
+            }, duration);
+        }
+
+        function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // Format Date safely
+        function timeAgo(dateString) {
+            if (!dateString) return 'Just now';
+            const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+            let interval = seconds / 60;
+            if (interval < 1) return 'Just now';
+            if (interval < 60) return Math.floor(interval) + ' min ago';
+            return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Sidebar Tabs
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                const target = e.currentTarget.dataset.target;
+                document.getElementById(target).classList.add('active');
+                if (target === 'panel-projects' || target === 'panel-overview') fetchStats();
+                if (target === 'panel-judges') fetchJudges();
+            });
+        });
+
+        /* ============================================================
+           CORE ADMIN LOGIC
+           ============================================================ */
+        let totalJudgesCount = 0; // for calculating judge progress
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/admin/stats', { headers: authHeaders });
+                const data = await res.json();
+                if (!data.success) {
+                    if (res.status === 401 || res.status === 403) logout();
+                    return;
+                }
+
+                // Update Top Status Badge
+                const statusBadge = document.getElementById('dashboard-status-badge');
+                if (data.winner_declared) {
+                    statusBadge.className = 'badge badge-warning'; statusBadge.innerHTML = '🏆 Winner Declared';
+                    disableControlsForWinner();
+                } else if (data.voting_active) {
+                    statusBadge.className = 'badge badge-success'; statusBadge.innerHTML = '🟢 Voting Live';
+                    enableControlsForStart();
+                } else {
+                    statusBadge.className = 'badge badge-danger'; statusBadge.innerHTML = '🔴 Voting Stopped';
+                    enableControlsForStop();
+                }
+
+                // Update counters
+                document.getElementById('stat-projects').textContent = data.projects.length;
+                document.getElementById('stat-votes').textContent = data.total_votes;
+                document.getElementById('stat-voters').textContent = data.unique_voters;
+
+                // Populate Overview Table (Top 5)
+                const tOverview = document.getElementById('table-overview').querySelector('tbody');
+                tOverview.innerHTML = '';
+                if (data.projects.length === 0) {
+                    tOverview.innerHTML = '<tr><td colspan="4" class="text-center text-muted p-2">No projects added yet.</td></tr>';
+                } else {
+                    data.projects.slice(0, 5).forEach((p, i) => {
+                        tOverview.innerHTML += `
+            <tr>
+              <td><span style="font-weight:800;color:var(--text-muted);">#${i + 1}</span></td>
+              <td><div style="font-weight:600;">${esc(p.project_name)}</div><div style="font-size:0.8rem;color:var(--text-muted);">${esc(p.team_name)}</div></td>
+              <td><span class="badge badge-primary">${esc(p.category || 'General')}</span></td>
+              <td style="text-align:right;font-weight:800;color:var(--primary);">${p.vote_count} pts</td>
+            </tr>`;
+                    });
+                }
+
+                // Update Live Feed (Initial load)
+                const feed = document.getElementById('live-feed');
+                if (data.recent_votes && data.recent_votes.length > 0) {
+                    feed.innerHTML = '';
+                    data.recent_votes.forEach(v => feed.innerHTML += createFeedHTML(v));
+                }
+
+                // Fetch specific Judge Scores to combine into Projects table
+                await fetchProjectsAndScores(data.projects);
+
+            } catch (e) {
+                console.error(e);
+                toast('Error fetching dashboard stats', 'error');
+            }
+        }
+
+        async function fetchProjectsAndScores() {
+            try {
+                const [projRes, judgeRes] = await Promise.all([
+                    fetch('/api/admin/projects', { headers: authHeaders }),
+                    fetch('/api/admin/judge-scores', { headers: authHeaders })
+                ]);
+                const pData = await projRes.json();
+                const jData = await judgeRes.json();
+
+                totalJudgesCount = jData.total_judges || 0;
+
+                const tProjects = document.getElementById('table-projects').querySelector('tbody');
+                tProjects.innerHTML = '';
+
+                if (!pData.success || pData.projects.length === 0) {
+                    tProjects.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-3">No projects found. Create one.</td></tr>';
+                    return;
+                }
+
+                // Merge data
+                const summaryMap = {};
+                (jData.summary || []).forEach(s => { summaryMap[s.project_id] = s; });
+
+                pData.projects.forEach(p => {
+                    const jInfo = summaryMap[p._id] || { judges_scored: 0, avg_judge_score: 0 };
+                    const scorePercent = totalJudgesCount > 0 ? (jInfo.judges_scored / totalJudgesCount) * 100 : 0;
+                    const jStr = totalJudgesCount > 0
+                        ? `<div style="font-size:0.85rem;font-weight:600;">${jInfo.judges_scored} / ${totalJudgesCount} judges</div>
+             <div class="judge-progress-bar"><div class="judge-progress-fill" style="width:${scorePercent}%"></div></div>
+             <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Avg Score: ${jInfo.avg_judge_score || 0}</div>`
+                        : '<span class="text-muted text-sm">No Judges Configured</span>';
+
+                    const finalScoreStr = p.final_score !== null
+                        ? `<span class="badge badge-success" style="font-size:0.9rem;">${p.final_score.toFixed(2)} pts</span>`
+                        : '<span class="text-muted text-sm">— pending —</span>';
+
+                    tProjects.innerHTML += `
+          <tr>
+            <td>
+              <div style="font-weight:700;font-size:0.95rem;">${esc(p.project_name)}</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);">👥 ${esc(p.team_name)}</div>
+            </td>
+            <td><span class="badge badge-muted">${esc(p.category || '')}</span></td>
+            <td><div style="font-weight:700;font-size:1.1rem;">${p.vote_count}</div></td>
+            <td style="width:160px;">${jStr}</td>
+            <td>${finalScoreStr}</td>
+            <td style="text-align:right;">
+              <div class="project-actions" style="justify-content:flex-end;">
+                <button class="btn btn-sm btn-outline" onclick="editProject('${p._id}')">Edit</button>
+                <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:rgba(239,68,68,0.3);" onclick="deleteProject('${p._id}')">Del</button>
+              </div>
+            </td>
+          </tr>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        /* ============================================================
+           JUDGE MANAGEMENT
+           ============================================================ */
+        async function fetchJudges() {
+            try {
+                const res = await fetch('/api/admin/judges', { headers: authHeaders });
+                const data = await res.json();
+                const tbody = document.getElementById('table-judges').querySelector('tbody');
+                tbody.innerHTML = '';
+                if (!data.success || data.judges.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted p-3">No judges found.</td></tr>';
+                    return;
+                }
+                data.judges.forEach(j => {
+                    tbody.innerHTML += `
+          <tr>
+            <td><div style="font-weight:600;">${esc(j.name)}</div></td>
+            <td><code>${esc(j.username)}</code></td>
+            <td style="text-align:right;">
+              <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:rgba(239,68,68,0.3);" onclick="deleteJudge('${j._id}')">Remove</button>
+            </td>
+          </tr>`;
+                });
+            } catch (e) { }
+        }
+
+        async function submitJudgeRegistration(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('j-name').value,
+                username: document.getElementById('j-user').value,
+                password: document.getElementById('j-pass').value
+            };
+            try {
+                const res = await fetch('/api/admin/judges', { method: 'POST', headers: authHeaders, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.success) {
+                    toast('Judge created successfully!', 'success');
+                    document.getElementById('add-judge-form').reset();
+                    fetchJudges();
+                    fetchStats(); // Update progress bars
+                } else {
+                    toast(data.message, 'error');
+                }
+            } catch (err) { toast('Error adding judge', 'error'); }
+        }
+
+        async function deleteJudge(id) {
+            if (!confirm('Delete this judge and all their scores?')) return;
+            try {
+                const res = await fetch(`/api/admin/judges/${id}`, { method: 'DELETE', headers: authHeaders });
+                const data = await res.json();
+                if (data.success) { toast('Judge removed', 'success'); fetchJudges(); fetchStats(); }
+                else toast(data.message, 'error');
+            } catch (e) { toast('Error deleting judge', 'error'); }
+        }
+
+        /* ============================================================
+           PROJECT MANAGEMENT
+           ============================================================ */
+        function openProjectModal() {
+            document.getElementById('project-form').reset();
+            document.getElementById('p-id').value = '';
+            document.getElementById('p-modal-title').textContent = 'Add New Project';
+            document.getElementById('project-modal').classList.add('open');
+        }
+
+        async function saveProject(e) {
+            e.preventDefault();
+            const id = document.getElementById('p-id').value;
+            const isEdit = !!id;
+            const payload = {
+                project_name: document.getElementById('p-name').value,
+                team_name: document.getElementById('p-team').value,
+                category: document.getElementById('p-category').value,
+                description: document.getElementById('p-desc').value
+            };
+            const url = isEdit ? `/api/projects/${id}` : '/api/projects';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const btn = document.getElementById('p-submit-btn');
+            btn.disabled = true; btn.textContent = 'Saving...';
+            try {
+                const res = await fetch(url, { method, headers: authHeaders, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.success) {
+                    toast('Project saved successfully!', 'success');
+                    closeModal('project-modal');
+                    fetchStats();
+                } else { toast(data.message, 'error'); }
+            } catch { toast('Network error', 'error'); }
+            finally { btn.disabled = false; btn.textContent = 'Save Project'; }
+        }
+
+        async function editProject(id) {
+            try {
+                const res = await fetch('/api/admin/projects', { headers: authHeaders });
+                const data = await res.json();
+                const p = data.projects.find(x => x._id === id);
+                if (p) {
+                    document.getElementById('p-id').value = p._id;
+                    document.getElementById('p-name').value = p.project_name;
+                    document.getElementById('p-team').value = p.team_name;
+                    document.getElementById('p-category').value = p.category || '';
+                    document.getElementById('p-desc').value = p.description || '';
+                    document.getElementById('p-modal-title').textContent = 'Edit Project';
+                    document.getElementById('project-modal').classList.add('open');
+                }
+            } catch { }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Are you sure you want to completely delete this project? This will also delete its votes and judge scores.')) return;
+            try {
+                const res = await fetch(`/api/projects/${id}`, { method: 'DELETE', headers: authHeaders });
+                const data = await res.json();
+                if (data.success) { toast('Project deleted', 'success'); fetchStats(); }
+                else { toast(data.message, 'error'); }
+            } catch { toast('Network error', 'error'); }
+        }
+
+        /* ============================================================
+           VOTING CONTROLS
+           ============================================================ */
+        function enableControlsForStart() {
+            document.getElementById('btn-start').disabled = true; document.getElementById('btn-start').style.opacity = '0.4';
+            document.getElementById('btn-stop').disabled = false; document.getElementById('btn-stop').style.opacity = '1';
+            document.getElementById('btn-declare').disabled = true; document.getElementById('btn-declare').style.opacity = '0.4';
+        }
+        function enableControlsForStop() {
+            document.getElementById('btn-start').disabled = false; document.getElementById('btn-start').style.opacity = '1';
+            document.getElementById('btn-stop').disabled = true; document.getElementById('btn-stop').style.opacity = '0.4';
+            document.getElementById('btn-declare').disabled = false; document.getElementById('btn-declare').style.opacity = '1';
+        }
+        function disableControlsForWinner() {
+            document.getElementById('btn-start').disabled = false; document.getElementById('btn-start').style.opacity = '1';
+            document.getElementById('btn-stop').disabled = true; document.getElementById('btn-stop').style.opacity = '0.4';
+            document.getElementById('btn-declare').disabled = true; document.getElementById('btn-declare').style.opacity = '0.4';
+        }
+
+        async function toggleVoting(start) {
+            const ep = start ? '/api/admin/voting/start' : '/api/admin/voting/stop';
+            const msg = start ? 'Start voting now? General users will be able to cast votes.' : 'Stop general voting?';
+            if (!confirm(msg)) return;
+            try {
+                const res = await fetch(ep, { method: 'POST', headers: authHeaders });
+                const data = await res.json();
+                if (data.success) { toast(data.message, start ? 'success' : 'warning'); fetchStats(); }
+                else toast(data.message, 'error');
+            } catch { toast('Network error', 'error'); }
+        }
+
+        async function declareWinner() {
+            if (!confirm('Are you ready to lock everything and calculate final scores? This will publish the Leaderboard publicly.')) return;
+            const btn = document.getElementById('btn-declare');
+            btn.disabled = true; btn.innerHTML = '<span class="ctrl-icon">⏳</span><span class="ctrl-label">Calculating...</span>';
+            try {
+                const res = await fetch('/api/admin/voting/declare-winner', { method: 'POST', headers: authHeaders });
+                const data = await res.json();
+                if (data.success) {
+                    toast('Success! Final scores calculated.', 'success', 6000);
+                    fetchStats();
+                } else { toast(data.message, 'error'); }
+            } catch { toast('Network error', 'error'); }
+            finally {
+                btn.innerHTML = '<span class="ctrl-icon">🏆</span><span class="ctrl-label">Declare Winner</span>';
+            }
+        }
+
+        async function resetSystem() {
+            if (!confirm('HARD RESET: This clears all votes, all judge scores, and sets project counters to zero. Project info and judge accounts remain. Are you sure you want to proceed?')) return;
+            const p = prompt("Type 'ok' to confirm hard reset:");
+            if (!p || p.trim().toLowerCase() !== 'ok') { toast('Reset cancelled.', 'info'); return; }
+            try {
+                const res = await fetch('/api/admin/reset', { method: 'POST', headers: authHeaders });
+                const data = await res.json();
+                if (data.success) { toast('System completely reset!', 'warning', 5000); fetchStats(); }
+                else toast(data.message, 'error');
+            } catch { toast('Network error during reset', 'error'); }
+        }
+
+        /* ============================================================
+           REAL-TIME SOCKETS
+           ============================================================ */
+        const socket = io();
+
+        function createFeedHTML(voteData) {
+            return `
+      <div class="vote-feed-item">
+        <div class="feed-dot"></div>
+        <div>New incoming vote cast for <strong>${esc(voteData.project_name)}</strong></div>
+        <div class="vote-feed-time">${timeAgo(voteData.timestamp)}</div>
+      </div>`;
+        }
+
+        socket.on('vote_cast', (data) => {
+            // We update stats silently in background
+            fetchStats();
+            // Prepend to feed
+            const feed = document.getElementById('live-feed');
+            const item = document.createElement('div');
+            item.className = 'vote-feed-item';
+            item.innerHTML = `
+      <div class="feed-dot"></div>
+      <div>New incoming vote cast for <strong>${esc(data.project_name)}</strong></div>
+      <div class="vote-feed-time">Just now</div>`;
+            feed.prepend(item);
+
+            // Manage feed length
+            if (feed.children.length > 30) feed.removeChild(feed.lastChild);
+
+            // Clear the "waiting" text if present
+            if (feed.innerHTML.includes('Waiting for votes')) {
+                const childs = feed.children;
+                for (let i = 0; i < childs.length; i++) {
+                    if (childs[i].classList.contains('text-center')) feed.removeChild(childs[i]);
+                }
+            }
+        });
+
+        socket.on('judge_score_submitted', () => { toast('A judge submitted scores!', 'info'); fetchStats(); });
+
+        // Init
+        checkAuth();
+        fetchStats();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vote – ExpoVote Live</title>
+    <meta name="description" content="Cast your votes for the best projects at the expo. Each visitor gets 3 votes!" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+        .vote-counter-display {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .vote-pills {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .vote-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .vote-pill.available {
+            background: #EEF0FF;
+            border: 2px dashed var(--primary-border);
+            color: var(--primary-light);
+        }
+
+        .vote-pill.used {
+            background: var(--gradient-primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(108, 99, 255, 0.4);
+        }
+
+        .vote-pill.used::before {
+            content: '✓';
+        }
+
+        .no-content {
+            text-align: center;
+            padding: 4rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .no-content-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <span class="logo-icon">🗳️</span> ExpoVote Live
+        </a>
+        <div class="navbar-logo-center">
+            <img src="/images/ainnovate-logo.png" alt="A INNOVATE">
+        </div>
+        <div class="navbar-links">
+            <a href="/vote" class="active" id="nav-vote">Vote</a>
+            <a href="/voting-leaderboard" id="nav-lb">Leaderboard</a>
+        </div>
+    </nav>
+
+    <div id="toast-container"></div>
+
+    <div class="page-wrapper">
+        <div class="container">
+
+            <!-- HERO -->
+            <div class="page-hero">
+                <span class="hero-icon">🗳️</span>
+                <h1>Cast Your <span class="gradient-text">Votes</span></h1>
+                <p>You have <strong>3 votes</strong> to distribute among your favourite projects. Choose wisely!</p>
+            </div>
+
+            <!-- STATUS BAR -->
+            <div class="vote-status-bar" id="vote-status-bar">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <span class="status-dot inactive" id="voting-indicator"></span>
+                    <span id="voting-status-text"
+                        style="font-weight:600;font-size:0.9rem;color:var(--text-secondary);">Checking status…</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                    <span style="font-size:0.85rem;color:var(--text-muted);font-weight:500;">Your Votes:</span>
+                    <div class="vote-pills" id="vote-pills">
+                        <div class="vote-pill available"></div>
+                        <div class="vote-pill available"></div>
+                        <div class="vote-pill available"></div>
+                    </div>
+                    <span id="votes-remaining-text" style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">3
+                        remaining</span>
+                </div>
+            </div>
+
+            <!-- LIMIT BANNER -->
+            <div class="limit-banner" id="limit-banner">
+                <span style="font-size:1.5rem;">🎉</span>
+                <span class="limit-banner-text" id="limit-banner-text">You have used all 3 votes. Thank you for
+                    participating!</span>
+            </div>
+
+            <!-- CLOSED STATE -->
+            <div id="closed-state" style="display:none;">
+                <div class="status-banner">
+                    <span class="status-banner-icon">🔒</span>
+                    <h2>Voting is Currently Closed</h2>
+                    <p>The voting session hasn't started yet or has been closed by the organizers. Check the leaderboard
+                        for results.</p>
+                    <a href="/leaderboard" class="btn btn-primary btn-lg mt-2">📊 View Leaderboard</a>
+                </div>
+            </div>
+
+            <!-- FILTER AREA -->
+            <div id="filter-area" style="display:none;">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="form-control" id="search-input" placeholder="Search projects or teams…" />
+                </div>
+                <div class="category-filters" id="category-filters">
+                    <button class="cat-btn active" data-cat="all">All Projects</button>
+                </div>
+            </div>
+
+            <!-- LOADING -->
+            <div id="loading-overlay"
+                style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem;">
+                <div class="spinner"></div>
+                <p style="color:var(--text-muted);">Loading projects…</p>
+            </div>
+
+            <!-- PROJECTS GRID -->
+            <div class="projects-grid" id="projects-grid" style="display:none;"></div>
+
+            <!-- NO PROJECTS -->
+            <div id="no-projects" class="no-content" style="display:none;">
+                <span class="no-content-icon">📭</span>
+                <p>No projects found matching your search.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VOTE CONFIRM MODAL -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Your Vote</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem;">You are about to vote for:</p>
+            <div
+                style="background:var(--primary-soft);border:1.5px solid var(--primary-border);border-radius:var(--radius-sm);padding:1.25rem;margin-bottom:1.5rem;">
+                <div style="font-weight:800;font-size:1.1rem;margin-bottom:0.3rem;font-family:'Outfit',sans-serif;"
+                    id="modal-project-name"></div>
+                <div style="color:var(--primary);font-size:0.88rem;margin-bottom:0.25rem;font-weight:600;"
+                    id="modal-team-name"></div>
+                <div style="color:var(--text-muted);font-size:0.82rem;" id="modal-votes-left"></div>
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+                <button class="btn btn-ghost btn-full" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary btn-full" id="confirm-vote-btn" onclick="confirmVote()">🗳️ Confirm
+                    Vote</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        /* ============================================================
+           VOTE PAGE – Logic
+           ============================================================ */
+
+        // Browser fingerprint
+        function getFingerprint() {
+            let fp = localStorage.getItem('evl_fp');
+            if (!fp) {
+                fp = 'fp_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36);
+                localStorage.setItem('evl_fp', fp);
+            }
+            return fp;
+        }
+
+        const FINGERPRINT = getFingerprint();
+        const socket = io();
+
+        let allProjects = [];
+        let votingActive = false;
+        let votesRemaining = 3;
+        let votesUsed = 0;
+        let pendingProjectId = null;
+        let pendingProjectName = '';
+
+        // ---- Toast ----
+        function toast(msg, type = 'info', duration = 4500) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => {
+                el.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => el.remove(), 350);
+            }, duration);
+        }
+
+        // ---- Vote Pills ----
+        function updateVotePills(used, max = 3) {
+            const container = document.getElementById('vote-pills');
+            container.innerHTML = '';
+            for (let i = 0; i < max; i++) {
+                const pill = document.createElement('div');
+                pill.className = 'vote-pill ' + (i < used ? 'used' : 'available');
+                container.appendChild(pill);
+            }
+            const remaining = Math.max(0, max - used);
+            document.getElementById('votes-remaining-text').textContent = remaining + ' remaining';
+            votesRemaining = remaining;
+            votesUsed = used;
+
+            if (remaining === 0) {
+                document.getElementById('limit-banner').classList.add('show');
+            }
+        }
+
+        // ---- Check vote status ----
+        async function checkVoteStatus() {
+            try {
+                const res = await fetch(`/api/votes/status?fingerprint=${FINGERPRINT}`);
+                const data = await res.json();
+                if (data.success) {
+                    updateVotePills(data.votes_used, data.max_votes);
+                    return data;
+                }
+            } catch (e) { /* ignore */ }
+            return null;
+        }
+
+        // ---- Load projects ----
+        async function loadProjects() {
+            try {
+                const [projRes, statusRes] = await Promise.all([
+                    fetch('/api/projects'),
+                    fetch('/api/admin/status')
+                ]);
+                const projData = await projRes.json();
+                const statusData = await statusRes.json();
+
+                votingActive = statusData.voting_active;
+                document.getElementById('loading-overlay').style.display = 'none';
+
+                if (statusData.winner_declared) {
+                    showWinnerState();
+                    return;
+                }
+
+                if (!votingActive) {
+                    document.getElementById('closed-state').style.display = 'block';
+                    updateVotingStatusBar(false);
+                    return;
+                }
+
+                updateVotingStatusBar(true);
+
+                if (!projData.success || projData.projects.length === 0) {
+                    document.getElementById('no-projects').style.display = 'block';
+                    return;
+                }
+
+                allProjects = projData.projects;
+
+                // Build category filters
+                const categories = new Set(['all']);
+                allProjects.forEach(p => { if (p.category) categories.add(p.category); });
+                const catFilter = document.getElementById('category-filters');
+                catFilter.innerHTML = '';
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn' + (cat === 'all' ? ' active' : '');
+                    btn.dataset.cat = cat;
+                    btn.textContent = cat === 'all' ? 'All Projects' : cat;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        filterProjects();
+                    };
+                    catFilter.appendChild(btn);
+                });
+
+                document.getElementById('filter-area').style.display = 'block';
+                const voteStatus = await checkVoteStatus();
+                renderProjects(allProjects, voteStatus?.voted_projects || []);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading-overlay').innerHTML =
+                    '<p style="color:var(--danger);">Failed to load projects. Please refresh the page.</p>';
+            }
+        }
+
+        function updateVotingStatusBar(active) {
+            const dot = document.getElementById('voting-indicator');
+            const text = document.getElementById('voting-status-text');
+            dot.className = 'status-dot ' + (active ? 'active' : 'inactive');
+            text.textContent = active ? '🟢 Voting is OPEN — Cast your votes now!' : '🔴 Voting is CLOSED';
+            text.style.color = active ? 'var(--success)' : 'var(--danger)';
+        }
+
+        function renderProjects(projects, votedProjectIds = []) {
+            const grid = document.getElementById('projects-grid');
+            const noP = document.getElementById('no-projects');
+            grid.style.display = 'grid';
+            grid.innerHTML = '';
+            noP.style.display = 'none';
+
+            if (projects.length === 0) {
+                grid.style.display = 'none';
+                noP.style.display = 'block';
+                return;
+            }
+
+            // Also check localStorage
+            const localVotes = JSON.parse(localStorage.getItem('evl_voted') || '[]');
+            const allVoted = [...new Set([...votedProjectIds, ...localVotes])];
+
+            projects.forEach((p, i) => {
+                const alreadyVoted = allVoted.includes(p._id);
+                const canVote = votingActive && votesRemaining > 0 && !alreadyVoted;
+                const card = document.createElement('div');
+                card.className = 'project-card' + (alreadyVoted ? ' voted' : '');
+                card.style.animationDelay = (i * 0.055) + 's';
+                card.id = 'pcard-' + p._id;
+
+                card.innerHTML = `
+        <div class="project-cat-badge">${esc(p.category || 'General')}</div>
+        <div class="project-name">${esc(p.project_name)}</div>
+        <div class="project-team">👥 ${esc(p.team_name)}</div>
+        <div class="project-desc">${esc(p.description)}</div>
+        <div class="project-footer">
+          ${alreadyVoted
+                        ? `<button class="vote-btn voted-btn" disabled>✓ Voted</button>`
+                        : `<button class="vote-btn" id="vbtn-${p._id}"
+                onclick="openVoteModal('${p._id}','${escAttr(p.project_name)}','${escAttr(p.team_name)}')"
+                ${!canVote ? 'disabled' : ''}>🗳️ Vote</button>`
+                    }
+        </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterProjects() {
+            const q = (document.getElementById('search-input').value || '').toLowerCase();
+            const cat = document.querySelector('.cat-btn.active')?.dataset.cat || 'all';
+            const filtered = allProjects.filter(p => {
+                const matchCat = cat === 'all' || p.category === cat;
+                const matchQ = !q || p.project_name.toLowerCase().includes(q) || p.team_name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
+                return matchCat && matchQ;
+            });
+            const localVotes = JSON.parse(localStorage.getItem('evl_voted') || '[]');
+            renderProjects(filtered, localVotes);
+        }
+
+        document.getElementById('search-input')?.addEventListener('input', filterProjects);
+
+        function openVoteModal(id, name, team) {
+            if (votesRemaining <= 0) { toast('You have used all 3 votes!', 'warning'); return; }
+            pendingProjectId = id;
+            pendingProjectName = name;
+            document.getElementById('modal-project-name').textContent = name;
+            document.getElementById('modal-team-name').textContent = 'by ' + team;
+            document.getElementById('modal-votes-left').textContent =
+                'After this vote, you will have ' + (votesRemaining - 1) + ' vote(s) remaining.';
+            document.getElementById('confirm-modal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('confirm-modal').classList.remove('open');
+            pendingProjectId = null;
+        }
+
+        async function confirmVote() {
+            if (!pendingProjectId) return;
+            const btn = document.getElementById('confirm-vote-btn');
+            btn.disabled = true; btn.textContent = '⏳ Submitting…';
+
+            try {
+                const res = await fetch('/api/votes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_id: pendingProjectId, fingerprint: FINGERPRINT })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const localVotes = JSON.parse(localStorage.getItem('evl_voted') || '[]');
+                    localVotes.push(pendingProjectId);
+                    localStorage.setItem('evl_voted', JSON.stringify(localVotes));
+
+                    updateVotePills(data.votes_used, 3);
+                    closeModal();
+                    toast(data.message, 'success');
+
+                    const card = document.getElementById('pcard-' + pendingProjectId);
+                    if (card) {
+                        card.classList.add('voted');
+                        const btn2 = card.querySelector('.vote-btn');
+                        if (btn2) { btn2.className = 'vote-btn voted-btn'; btn2.disabled = true; btn2.textContent = '✓ Voted'; }
+                    }
+
+                    if (data.votes_remaining === 0) {
+                        // Disable all vote buttons
+                        document.querySelectorAll('.vote-btn:not(.voted-btn)').forEach(b => b.disabled = true);
+                    }
+                } else {
+                    closeModal();
+                    toast(data.message, 'error', 6000);
+                    if (data.votes_remaining === 0) updateVotePills(3, 3);
+                }
+            } catch (e) {
+                closeModal();
+                toast('Network error. Please try again.', 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = '🗳️ Confirm Vote';
+            }
+        }
+
+        function showWinnerState() {
+            document.getElementById('closed-state').innerHTML = `
+      <div class="status-banner">
+        <span class="status-banner-icon">🏆</span>
+        <h2 style="color:var(--gold);">Winner Declared!</h2>
+        <p>Voting has ended. The results are now available on the leaderboard.</p>
+        <a href="/leaderboard" class="btn btn-warning btn-lg mt-2">🎉 See Results</a>
+      </div>`;
+            document.getElementById('closed-state').style.display = 'block';
+        }
+
+        // Socket.IO
+        socket.on('voting_started', () => { toast('🚀 Voting has started!', 'success'); setTimeout(() => location.reload(), 1200); });
+        socket.on('voting_stopped', () => { toast('⏹ Voting has been closed.', 'warning'); setTimeout(() => location.reload(), 1500); });
+        socket.on('winner_declared', () => { toast('🏆 A winner has been declared!', 'info'); setTimeout(() => location.reload(), 2000); });
+        socket.on('project_added', () => { if (votingActive) loadProjects(); });
+        socket.on('project_updated', () => { loadProjects(); });
+        socket.on('project_deleted', () => { loadProjects(); });
+
+        // Escape helpers
+        function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function escAttr(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+
+        loadProjects();
+    </script>
+</body>
+
+</html>

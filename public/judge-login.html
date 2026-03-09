@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Judge Login – ExpoVote Live</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body style="background:var(--bg-page);">
+
+    <div id="toast-container"></div>
+
+    <div class="login-wrap">
+        <div class="login-card">
+            <div class="login-card-accent" style="background:var(--gradient-cool);"></div>
+            <div class="login-logo">
+                <img src="/images/ainnovate-logo.png" alt="A INNOVATE"
+                    style="height:110px;margin:0 auto 1.5rem;display:block;">
+                <h2 style="font-family:'Outfit',sans-serif;">Judge Portal</h2>
+                <p>Sign in to evaluate and score projects.</p>
+            </div>
+
+            <form id="judge-login-form">
+                <div class="form-group mb-2">
+                    <label class="form-label" for="judge-username">Judge ID / Username</label>
+                    <div style="position:relative;">
+                        <input type="text" id="judge-username" class="form-control" placeholder="e.g. judge1" required
+                            style="padding-left:1.25rem;">
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label class="form-label" for="judge-password">Password</label>
+                    <div style="position:relative;">
+                        <input type="password" id="judge-password" class="form-control" placeholder="••••••••" required
+                            style="padding-left:1.25rem;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-xl btn-full mb-3" id="submit-btn"
+                    style="background:var(--gradient-cool);box-shadow:0 4px 18px rgba(67,198,172,0.35);letter-spacing:0.04em;">Access
+                    Scorecards 📋</button>
+                <div class="text-center">
+                    <a href="/"
+                        style="font-size:0.85rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:0.3rem;"
+                        class="hover:text-primary transition">
+                        <span style="font-size:1rem;">←</span> Return to Public Pages
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        if (localStorage.getItem('evl_jtoken')) { window.location.href = '/judge/dashboard'; }
+
+        function toast(msg, type = 'info', duration = 4000) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => {
+                el.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => el.remove(), 350);
+            }, duration);
+        }
+
+        document.getElementById('judge-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true; btn.textContent = 'Authenticating...';
+
+            const payload = {
+                username: document.getElementById('judge-username').value,
+                password: document.getElementById('judge-password').value
+            };
+
+            try {
+                const res = await fetch('/api/judge/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('evl_jtoken', data.token);
+                    toast('Login successful! Redirecting...', 'success', 2000);
+                    setTimeout(() => { window.location.href = '/judge/dashboard'; }, 600);
+                } else {
+                    toast(data.message, 'error');
+                    document.getElementById('judge-password').value = '';
+                }
+            } catch { toast('Network error. Is server running?', 'error'); }
+            finally { btn.disabled = false; btn.textContent = 'Access Scorecards 📋'; }
+        });
+    </script>
+</body>
+
+</html>

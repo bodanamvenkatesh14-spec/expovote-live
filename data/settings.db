@@ -1,0 +1,14 @@
+{"key":"voting_active","value":true,"_id":"c0PwUNLqoUC6aunk"}
+{"key":"winner_project_id","value":null,"_id":"qRAScFBMgRHOfpUP"}
+{"key":"final_scores","value":null,"_id":"sZge6dXzmMjYohpD"}
+{"key":"winner_declared","value":false,"_id":"vN5EN1nlJNXhi6WW"}
+{"$$indexCreated":{"fieldName":"key","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"key","unique":true}}
+{"key":"voting_active","value":false,"_id":"c0PwUNLqoUC6aunk"}
+{"key":"voting_active","value":false,"_id":"c0PwUNLqoUC6aunk"}
+{"key":"winner_declared","value":false,"_id":"vN5EN1nlJNXhi6WW"}
+{"key":"final_scores","value":null,"_id":"sZge6dXzmMjYohpD"}
+{"key":"voting_active","value":true,"_id":"c0PwUNLqoUC6aunk"}
+{"key":"winner_declared","value":false,"_id":"vN5EN1nlJNXhi6WW"}
+{"key":"final_scores","value":null,"_id":"sZge6dXzmMjYohpD"}
+{"key":"voting_active","value":false,"_id":"c0PwUNLqoUC6aunk"}

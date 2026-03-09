@@ -1,0 +1,61 @@
+{
+    "admin": {
+        "username": "admin",
+        "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"
+    },
+    "settings": {
+        "votingActive": false,
+        "winnerDeclared": false,
+        "winnerId": null,
+        "eventName": "TECH FORGE 2k26",
+        "maxVotesPerIP": 3
+    },
+    "projects": [
+        {
+            "id": "p1",
+            "name": "Smart Agriculture Monitor",
+            "team": "Team Alpha",
+            "description": "IoT-based crop monitoring system with AI-driven irrigation control and real-time soil analysis.",
+            "category": "IoT & AI",
+            "voteCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z"
+        },
+        {
+            "id": "p2",
+            "name": "MediAssist AI",
+            "team": "Team Beta",
+            "description": "Symptom-based disease predictor using machine learning with personalized treatment recommendations.",
+            "category": "Healthcare AI",
+            "voteCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z"
+        },
+        {
+            "id": "p3",
+            "name": "EcoRoute Planner",
+            "team": "Team Gamma",
+            "description": "Carbon-footprint-aware route optimization app using graph algorithms for sustainable commuting.",
+            "category": "Sustainability",
+            "voteCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z"
+        },
+        {
+            "id": "p4",
+            "name": "SecureVault Blockchain",
+            "team": "Team Delta",
+            "description": "Decentralized document verification system using smart contracts on Ethereum blockchain.",
+            "category": "Blockchain",
+            "voteCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z"
+        },
+        {
+            "id": "p5",
+            "name": "EdTech VR Classroom",
+            "team": "Team Epsilon",
+            "description": "Immersive virtual reality classroom experience for remote learning with 3D interactive labs.",
+            "category": "EdTech",
+            "voteCount": 0,
+            "createdAt": "2026-03-01T00:00:00Z"
+        }
+    ],
+    "votes": []
+}
