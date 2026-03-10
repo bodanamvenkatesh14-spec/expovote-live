@@ -2096,7 +2096,7 @@ select.form-control {
 
 @media (max-width: 768px) {
   :root {
-    --navbar-h: 80px;
+    --navbar-h: 90px;
   }
 
   .navbar {
@@ -2109,7 +2109,7 @@ select.form-control {
     left: auto;
     top: auto;
     transform: none;
-    height: 64px;
+    height: 72px;
     margin: 0 auto;
   }
 
@@ -2261,10 +2261,10 @@ select.form-control {
 
 @media (max-width: 600px) {
   .hero-title {
-    font-size: 1.85rem !important;
-    line-height: 1.25;
+    font-size: 2.25rem !important;
+    line-height: 1.2;
     padding: 0 1rem;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 
   .hero-subtitle {
@@ -2300,7 +2300,7 @@ select.form-control {
   }
 
   .navbar-logo-center {
-    height: 58px;
+    height: 64px;
   }
 
   .navbar-links a,
@@ -2312,7 +2312,7 @@ select.form-control {
 
 @media (max-width: 400px) {
   .hero-title {
-    font-size: 1.6rem !important;
+    font-size: 1.9rem !important;
   }
 
   .portal-card {
@@ -2324,6 +2324,6 @@ select.form-control {
   }
 
   .navbar-logo-center {
-    height: 52px;
+    height: 56px;
   }
 }
