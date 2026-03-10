@@ -2096,7 +2096,7 @@ select.form-control {
 
 @media (max-width: 768px) {
   :root {
-    --navbar-h: 66px;
+    --navbar-h: 80px;
   }
 
   .navbar {
@@ -2109,7 +2109,7 @@ select.form-control {
     left: auto;
     top: auto;
     transform: none;
-    height: 48px;
+    height: 64px;
     margin: 0 auto;
   }
 
@@ -2300,7 +2300,7 @@ select.form-control {
   }
 
   .navbar-logo-center {
-    height: 42px;
+    height: 58px;
   }
 
   .navbar-links a,
@@ -2324,6 +2324,6 @@ select.form-control {
   }
 
   .navbar-logo-center {
-    height: 36px;
+    height: 52px;
   }
 }
