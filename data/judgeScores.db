@@ -1,3 +1,4 @@
+{"judge_id":"SuvEFOlhY9jxVGht","project_id":"dqWwY06lINUfAjPh","judge_name":"Judge 1","problem":10,"innovation":20,"technical":20,"functionality":15,"impact":10,"ui":0,"presentation":6,"communication":0,"total":81,"created_at":{"$$date":1773139610142},"updated_at":{"$$date":1773139628141},"_id":"TB2fHE5yPMSvYxJB"}
 {"$$indexCreated":{"fieldName":"judge_id","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"project_id","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"judge_id"}}

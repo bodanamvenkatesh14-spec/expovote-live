@@ -144,7 +144,11 @@ img {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  height: 54px;
+  height: 64px;
+  /* Default height */
+  width: auto;
+  min-width: 170px;
+  /* Force minimum width to avoid being collapsed too much */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,14 +172,19 @@ img {
   }
 
   .navbar-logo-center {
-    height: 48px;
+    height: 56px;
+    min-width: 150px;
   }
 }
 
 .navbar-logo-center img {
-  height: 100%;
+  height: auto;
   width: auto;
+  max-height: 100%;
+  max-width: 100%;
   object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: contrast(1.15) brightness(1.05);
 }
 
 .navbar-brand {
@@ -2097,7 +2106,7 @@ select.form-control {
 
 @media (max-width: 768px) {
   :root {
-    --navbar-h: 100px;
+    --navbar-h: 110px;
   }
 
   .navbar {
@@ -2110,7 +2119,7 @@ select.form-control {
     left: auto;
     top: auto;
     transform: none;
-    height: 82px;
+    height: 96px;
     margin: 0 auto;
   }
 
