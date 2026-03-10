@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#43c6ac">
     <title>Judge Dashboard – ExpoVote Live</title>
     <link rel="stylesheet" href="/css/style.css" />
     <style>
@@ -64,16 +67,18 @@
         .score-range-col input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--primary);
             cursor: pointer;
             transition: transform 0.1s;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         .score-range-col input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
         }
 
         /* Mobile specific adjustments for score sliders */
@@ -104,11 +109,12 @@
         }
 
         .total-score-value {
-            font-size: 3rem;
-            font-weight: 900;
+            font-size: 3.5rem;
+            font-weight: 950;
             font-family: 'Outfit', sans-serif;
             color: var(--primary);
             line-height: 1;
+            text-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
         }
 
         .j-card-header {

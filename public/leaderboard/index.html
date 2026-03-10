@@ -3,10 +3,19 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6c63ff">
     <title>Leaderboard – ExpoVote Live</title>
     <meta name="description" content="Live leaderboard showing final rankings of expo projects." />
     <link rel="stylesheet" href="/css/style.css" />
+    <script>
+        const ADMIN_TOKEN = localStorage.getItem('evl_token');
+        if (!ADMIN_TOKEN) {
+            window.location.replace('/admin/login?redirect=/leaderboard');
+        }
+    </script>
     <style>
         .podium {
             display: flex;
@@ -136,9 +145,9 @@
 
             <!-- HERO -->
             <div class="page-hero">
-                <span class="hero-icon">🏆</span>
-                <h1>Project <span class="gradient-text">Leaderboard</span></h1>
-                <p>Final rankings of all expo projects based on audience votes and judges' marks.</p>
+                <span class="hero-icon" id="hero-icon">🏆</span>
+                <h1 id="hero-title">Project <span class="gradient-text">Leaderboard</span></h1>
+                <p id="hero-desc">Loading standings...</p>
             </div>
 
             <!-- LOADING -->
@@ -152,13 +161,8 @@
             <div id="waiting-state" style="display:none;">
                 <div class="leaderboard-waiting">
                     <span class="wait-icon">⏳</span>
-                    <h2>Results Not Yet Published</h2>
-                    <p>The admin hasn't declared the winner yet. Stay tuned! Once the admin clicks "Declare Winner", the
-                        full leaderboard will appear here in real time.</p>
-                    <div
-                        style="margin-top:2rem;display:flex;align-items:center;justify-content:center;gap:0.65rem;color:var(--text-muted);font-size:0.9rem;">
-                        <span class="status-dot active"></span> Live – Updating automatically
-                    </div>
+                    <h2 id="waiting-title">Voting Not Started</h2>
+                    <p id="waiting-desc">The admin hasn't started the event yet. Stay tuned!</p>
                 </div>
             </div>
 
@@ -181,13 +185,8 @@
                     <div id="lb-rows"></div>
                 </div>
 
-                <div style="text-align:center;padding:2rem 0 3rem;color:var(--text-muted);font-size:0.85rem;">
-                    <div
-                        style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:0.35rem;">
-                        <span class="status-dot active"></span> Results are final · Score = (Votes × 30%) + (Judge Marks
-                        × 70%)
-                    </div>
-                    <div>Vote scores and judge marks are hidden · Only final scores are displayed.</div>
+                <div id="lb-disclaimer"
+                    style="text-align:center;padding:2rem 0 3rem;color:var(--text-muted);font-size:0.85rem;">
                 </div>
 
             </div>
@@ -197,6 +196,23 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        const authHeaders = {
+            'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/verify', { headers: authHeaders });
+                const data = await res.json();
+                if (!data.success || data.role !== 'admin') { throw new Error('Unauthorized'); }
+            } catch {
+                localStorage.removeItem('evl_token');
+                window.location.href = '/admin/login?redirect=/leaderboard';
+            }
+        }
+        checkAuth();
+
         const socket = io();
 
         function toast(msg, type = 'info', duration = 5000) {
@@ -292,45 +308,64 @@
             }, 15500);
         }
 
-        function renderLeaderboard(scores) {
+        function renderLeaderboard(scores, isFinal = true) {
             const container = document.getElementById('lb-rows');
             container.innerHTML = '';
-            const maxScore = scores.length > 0 ? scores[0].final_score : 100;
+            const maxScore = isFinal && scores.length > 0 ? scores[0].final_score : 100;
 
             scores.forEach((p, i) => {
                 const rankClass = i === 0 ? 'rank-top-1' : i === 1 ? 'rank-top-2' : i === 2 ? 'rank-top-3' : '';
                 const rankBadgeClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
                 const medal = getMedalEmoji(p.rank);
-                const barWidth = maxScore > 0 ? ((p.final_score / maxScore) * 100).toFixed(1) : '0';
+                const barWidth = isFinal && maxScore > 0 ? ((p.final_score / maxScore) * 100).toFixed(1) : '0';
                 const row = document.createElement('div');
                 row.className = `leaderboard-row ${rankClass}`;
                 row.style.animationDelay = (i * 0.06) + 's';
-                row.innerHTML = `
-        <div class="rank-badge ${rankBadgeClass}">${medal || p.rank}</div>
-        <div class="lb-project-info">
-          <div class="lb-project-name">${esc(p.project_name)}</div>
-          <div class="lb-team-name">${esc(p.team_name || '')}</div>
-          <div class="score-bar-wrap mt-1">
-            <div class="score-bar-track">
-              <div class="score-bar-fill" style="width:0%" data-width="${barWidth}%"></div>
+
+                if (isFinal) {
+                    row.innerHTML = `
+            <div class="rank-badge ${rankBadgeClass}">${medal || p.rank}</div>
+            <div class="lb-project-info">
+            <div class="lb-project-name">${esc(p.project_name)}</div>
+            <div class="lb-team-name">${esc(p.team_name || '')}</div>
+            <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);display:flex;gap:1.5rem;">
+                <div><strong style="color:var(--text);">${p.project_votes}</strong> Votes</div>
+                <div><strong style="color:var(--text);">${p.avg_judge_marks}</strong> Avg Judge Score</div>
             </div>
-          </div>
-        </div>
-        <div class="lb-score-col">
-          <div class="lb-score-value">${p.final_score.toFixed(2)}</div>
-          <div class="lb-score-label">/ 100 pts</div>
-        </div>`;
+            <div class="score-bar-wrap mt-1">
+                <div class="score-bar-track">
+                <div class="score-bar-fill" style="width:0%" data-width="${barWidth}%"></div>
+                </div>
+            </div>
+            </div>
+            <div class="lb-score-col">
+            <div class="lb-score-value">${p.final_score.toFixed(2)}</div>
+            <div class="lb-score-label">/ 100 pts</div>
+            </div>`;
+                } else {
+                    row.innerHTML = `
+            <div class="rank-badge ${rankBadgeClass}">${medal || p.rank}</div>
+            <div class="lb-project-info" style="justify-content:center;">
+            <div class="lb-project-name">${esc(p.project_name)}</div>
+            <div class="lb-team-name">${esc(p.team_name || '')}</div>
+            </div>
+            <div class="lb-score-col" style="justify-content:center;align-items:flex-end;">
+            <span class="badge badge-warning">Voting Live</span>
+            </div>`;
+                }
+
                 container.appendChild(row);
             });
 
-            // Animate score bars
-            requestAnimationFrame(() => {
+            if (isFinal) {
                 requestAnimationFrame(() => {
-                    document.querySelectorAll('.score-bar-fill').forEach(bar => {
-                        bar.style.width = bar.dataset.width;
+                    requestAnimationFrame(() => {
+                        document.querySelectorAll('.score-bar-fill').forEach(bar => {
+                            bar.style.width = bar.dataset.width;
+                        });
                     });
                 });
-            });
+            }
         }
 
         async function loadLeaderboard() {
@@ -340,15 +375,52 @@
 
                 document.getElementById('loading-state').style.display = 'none';
 
-                if (!data.winner_declared || !data.final_scores || data.final_scores.length === 0) {
+                if (!data.voting_active && !data.winner_declared) {
+                    document.getElementById('leaderboard-content').style.display = 'none';
                     document.getElementById('waiting-state').style.display = 'block';
+                    document.getElementById('waiting-title').textContent = 'Voting Not Started';
+                    document.getElementById('waiting-desc').textContent = 'The admin hasn\'t started the event yet. Stay tuned!';
                     return;
                 }
 
-                const scores = data.final_scores;
-                const animate = !sessionStorage.getItem('leaderboard_revealed');
-                if (animate) sessionStorage.setItem('leaderboard_revealed', 'true');
-                revealLeaderboard(scores, animate);
+                if (data.voting_active && !data.winner_declared) {
+                    // LIVE VOTING
+                    document.getElementById('hero-title').innerHTML = 'Live <span class="gradient-text">Vote Rankings</span>';
+                    document.getElementById('hero-icon').textContent = '📈';
+                    document.getElementById('hero-desc').textContent = 'Current standings based solely on public audience votes.';
+                    document.getElementById('lb-disclaimer').innerHTML = '<div><span class="status-dot warning"></span> Live audience rankings ONLY. Exact votes hidden during live event.</div>';
+
+                    const resLive = await fetch('/api/voting-rankings');
+                    const dataLive = await resLive.json();
+
+                    if (!dataLive.rankings || dataLive.rankings.length === 0) {
+                        document.getElementById('waiting-state').style.display = 'block';
+                        document.getElementById('waiting-title').textContent = 'Waiting For Votes';
+                        document.getElementById('waiting-desc').textContent = 'Voting is active! Waiting for the first votes to roll in.';
+                        return;
+                    }
+
+                    document.getElementById('waiting-state').style.display = 'none';
+                    document.getElementById('leaderboard-content').style.display = 'block';
+                    document.getElementById('podium-section').style.display = 'none'; // hide podium for live
+                    document.getElementById('lb-list').style.display = 'block';
+                    renderLeaderboard(dataLive.rankings, false);
+                    return;
+                }
+
+                if (data.winner_declared) {
+                    // FINAL RESULTS
+                    document.getElementById('hero-title').innerHTML = 'Project <span class="gradient-text">Leaderboard</span>';
+                    document.getElementById('hero-icon').textContent = '🏆';
+                    document.getElementById('hero-desc').textContent = 'Final rankings of all expo projects based on audience votes and judges\' marks.';
+                    document.getElementById('lb-disclaimer').innerHTML = '<div style="margin-bottom:0.35rem;"><span class="status-dot active"></span> Results are final · Score = (Votes × 30%) + (Judge Marks × 70%)</div>';
+                    document.getElementById('waiting-state').style.display = 'none';
+
+                    const scores = data.final_scores;
+                    const animate = !sessionStorage.getItem('leaderboard_revealed');
+                    if (animate) sessionStorage.setItem('leaderboard_revealed', 'true');
+                    revealLeaderboard(scores, animate);
+                }
 
             } catch (e) {
                 document.getElementById('loading-state').innerHTML =
@@ -356,34 +428,22 @@
             }
         }
 
-        // Socket: real-time winner declared
         socket.on('winner_declared', (data) => {
             toast('🏆 Results are now live!', 'success', 6000);
-            if (data && data.leaderboard) {
-                document.getElementById('waiting-state').style.display = 'none';
-                sessionStorage.setItem('leaderboard_revealed', 'true');
-                revealLeaderboard(data.leaderboard, true);
-            } else {
-                setTimeout(() => location.reload(), 1500);
-            }
+            setTimeout(() => location.reload(), 2000);
         });
 
-        socket.on('voting_started', () => {
-            document.getElementById('waiting-state').style.display = 'block';
-            document.getElementById('leaderboard-content').style.display = 'none';
+        socket.on('voting_started', () => { setTimeout(() => location.reload(), 1000); });
+        socket.on('voting_stopped', () => { setTimeout(() => location.reload(), 1000); });
+        socket.on('vote_cast', () => {
+            // If we are merely polling live votes, loadLeaderboard refetches
+            loadLeaderboard();
         });
 
-        // Request latest leaderboard data
-        socket.on('connect', () => socket.emit('request_leaderboard'));
-        socket.on('leaderboard_data', (data) => {
-            if (data.winner_declared && data.final_scores && data.final_scores.length > 0) {
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('waiting-state').style.display = 'none';
-                const animate = !sessionStorage.getItem('leaderboard_revealed');
-                if (animate) sessionStorage.setItem('leaderboard_revealed', 'true');
-                revealLeaderboard(data.final_scores, animate);
-            }
-        });
+        setInterval(() => {
+            // auto-poll every 10 seconds just in case sockets fail
+            loadLeaderboard();
+        }, 10000);
 
         loadLeaderboard();
     </script>

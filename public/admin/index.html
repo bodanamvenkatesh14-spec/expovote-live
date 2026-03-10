@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6c63ff">
     <title>Admin Dashboard – ExpoVote Live</title>
     <meta name="description" content="ExpoVote Live Administrative Dashboard and Management Panel." />
     <link rel="stylesheet" href="/css/style.css" />
@@ -59,7 +62,7 @@
 
 <body>
     <!-- NAVBAR -->
-    <nav class="navbar" style="border-bottom:1px solid var(--border); box-shadow:var(--shadow-sm);">
+    <nav class="navbar">
         <a href="/" class="navbar-brand">
             <span class="logo-icon">🛡️</span> Admin Panel
         </a>
@@ -67,9 +70,8 @@
             <img src="/images/ainnovate-logo.png" alt="A INNOVATE">
         </div>
         <div class="navbar-links">
-            <span id="admin-user-info"
-                style="font-size:0.85rem;font-weight:600;margin-right:1rem;color:var(--text-muted);"></span>
-            <a href="/" target="_blank" style="background:var(--bg-subtle);">👁️ View Live Vote</a>
+            <a href="/" target="_blank" style="background:var(--bg-subtle);">👁️ Live Vote</a>
+            <a href="/leaderboard" target="_blank" style="background:var(--bg-subtle);">🏆 Leaderboard</a>
             <button class="btn btn-sm btn-outline" onclick="logout()" style="padding:0.35rem 0.75rem;">Logout</button>
         </div>
     </nav>
@@ -342,7 +344,6 @@
                 const res = await fetch('/api/auth/verify', { headers: authHeaders });
                 const data = await res.json();
                 if (!data.success || data.role !== 'admin') { throw new Error('Unauthorized'); }
-                document.getElementById('admin-user-info').textContent = `Hi, Admin (${data.username})`;
             } catch {
                 localStorage.removeItem('evl_token');
                 window.location.href = '/admin/login';

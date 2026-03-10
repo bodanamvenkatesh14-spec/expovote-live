@@ -7,6 +7,12 @@
     <title>Leaderboard – ExpoVote Live</title>
     <meta name="description" content="Live leaderboard showing final rankings of expo projects." />
     <link rel="stylesheet" href="/css/style.css" />
+    <script>
+        const ADMIN_TOKEN = localStorage.getItem('evl_token');
+        if (!ADMIN_TOKEN) {
+            window.location.replace('/admin/login?redirect=/voting-leaderboard');
+        }
+    </script>
     <style>
         .podium {
             display: flex;
@@ -194,6 +200,23 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        const authHeaders = {
+            'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            'Content-Type': 'application/json'
+        };
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/verify', { headers: authHeaders });
+                const data = await res.json();
+                if (!data.success || data.role !== 'admin') { throw new Error('Unauthorized'); }
+            } catch {
+                localStorage.removeItem('evl_token');
+                window.location.href = '/admin/login?redirect=/voting-leaderboard';
+            }
+        }
+        checkAuth();
+
         const socket = io();
 
         function toast(msg, type = 'info', duration = 5000) {

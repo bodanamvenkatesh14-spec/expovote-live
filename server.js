@@ -550,6 +550,10 @@ app.post('/api/admin/voting/declare-winner', adminAuthMW, async (req, res) => {
       team_name: p.team_name,
       category: p.category,
       final_score: p.final_score,
+      project_votes: p.project_votes,
+      vote_score: p.vote_score,
+      avg_judge_marks: p.avg_judge_marks,
+      judge_score: p.judge_score,
       is_winner: i === 0,
     }));
     await setSetting('final_scores', finalScoresList);
@@ -611,7 +615,7 @@ app.post('/api/admin/reset', adminAuthMW, async (req, res) => {
 // =========================================================
 // PAGES
 // =========================================================
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote', 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/vote', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote', 'index.html')));
 app.get('/voting-leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'voting-leaderboard', 'index.html')));
 app.get('/leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'leaderboard', 'index.html')));

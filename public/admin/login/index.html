@@ -17,9 +17,9 @@
             <div class="login-card-accent"></div>
             <div class="login-logo">
                 <img src="/images/ainnovate-logo.png" alt="A INNOVATE"
-                    style="height:110px;margin:0 auto 1.5rem;display:block;">
-                <h2 style="font-family:'Outfit',sans-serif;">Admin Portal</h2>
-                <p>Sign in to manage projects and voting.</p>
+                    style="height:80px;margin:0 auto 1.5rem;display:block;">
+                <h2 id="login-heading" style="font-family:'Outfit',sans-serif;">Admin Portal</h2>
+                <p id="login-subheading">Sign in to manage projects and voting.</p>
             </div>
 
             <form id="login-form">
@@ -51,7 +51,15 @@
     </div>
 
     <script>
-        if (localStorage.getItem('evl_token')) { window.location.href = '/admin'; }
+        const params = new URLSearchParams(window.location.search);
+        const redirectUrl = params.get('redirect') || '/admin';
+
+        if (redirectUrl.includes('leaderboard')) {
+            document.getElementById('login-heading').textContent = 'Leaderboard Access';
+            document.getElementById('login-subheading').textContent = 'Sign in to view live project rankings.';
+        }
+
+        if (localStorage.getItem('evl_token')) { window.location.href = redirectUrl; }
 
         function toast(msg, type = 'info', duration = 4000) {
             const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
@@ -84,7 +92,7 @@
                 if (data.success) {
                     localStorage.setItem('evl_token', data.token);
                     toast('Login successful! Redirecting...', 'success', 2000);
-                    setTimeout(() => { window.location.href = '/admin'; }, 600);
+                    setTimeout(() => { window.location.href = redirectUrl; }, 600);
                 } else {
                     toast(data.message, 'error');
                     document.getElementById('password').value = '';

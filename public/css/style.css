@@ -65,7 +65,7 @@
 
   /* Misc */
   --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  --navbar-h: 86px;
+  --navbar-h: 70px;
 }
 
 /* ============================================================
@@ -75,6 +75,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
   margin: 0;
   padding: 0;
 }
@@ -132,11 +133,10 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px);
+  padding: 0 1rem;
+  background: #FFFFFF;
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 16px rgba(26, 29, 46, 0.06);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.02);
 }
 
 .navbar-logo-center {
@@ -144,11 +144,32 @@ img {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  height: 76px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  z-index: 10;
+}
+
+/* Ensure brand and links don't go under logo on medium screens */
+@media (max-width: 1200px) {
+
+  .navbar-links a,
+  .navbar-links button {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .navbar-brand {
+    font-size: 1.15rem;
+  }
+
+  .navbar-logo-center {
+    height: 48px;
+  }
 }
 
 .navbar-logo-center img {
@@ -194,6 +215,15 @@ img {
 .navbar-links a:hover {
   color: var(--primary);
   background: var(--primary-soft);
+}
+
+.btn,
+.portal-card,
+.sidebar-link,
+.nav-btn,
+.navbar-logo-center {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .navbar-links a.active {
@@ -625,13 +655,25 @@ select.form-control {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2rem;
-  width: 90%;
+  width: 92%;
   max-width: 520px;
-  max-height: 90vh;
+  max-height: 92vh;
   overflow-y: auto;
+  position: relative;
   box-shadow: var(--shadow-lg);
   transform: scale(0.9) translateY(20px);
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (max-width: 600px) {
+  .modal {
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-title {
+    font-size: 1.4rem;
+  }
 }
 
 .modal-overlay.open .modal {
@@ -735,6 +777,7 @@ select.form-control {
   font-size: 1.05rem;
   max-width: 520px;
   margin: 0 auto;
+  word-break: break-word;
 }
 
 .gradient-text {
@@ -783,6 +826,26 @@ select.form-control {
 /* ============================================================
    STAT CARDS
    ============================================================ */
+.project-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .project-card {
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+}
+
 .stat-card {
   background: var(--bg-white);
   border: 1px solid var(--border);
@@ -1899,6 +1962,125 @@ select.form-control {
 }
 
 /* ============================================================
+   HOMEPAGE PORTAL (Moved from index.html)
+   ============================================================ */
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+  max-width: 1100px;
+  margin: 4rem auto 0;
+  padding: 0 2rem;
+}
+
+.portal-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  border-radius: 2.5rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.08);
+  transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.portal-card:hover::after {
+  background: var(--gradient-primary);
+}
+
+.portal-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.12);
+  border-color: #d1d5db;
+}
+
+.portal-icon {
+  font-size: 5.5rem;
+  margin-bottom: 2.5rem;
+  display: inline-block;
+  transition: transform 0.5s ease;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.08));
+}
+
+.portal-card:hover .portal-icon {
+  transform: scale(1.1) translateY(-5px);
+}
+
+.portal-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.85rem;
+  font-weight: 850;
+  margin-bottom: 1rem;
+  color: #6366f1 !important;
+  letter-spacing: -0.01em;
+}
+
+.portal-subtitle {
+  font-size: 1.05rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  color: #1a1d2e;
+  letter-spacing: -0.02em;
+}
+
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: #64748b;
+  font-weight: 450;
+  margin-bottom: 2rem;
+}
+
+.homepage-container {
+  text-align: center;
+  padding-top: 3.5rem;
+}
+
+@media (max-width: 600px) {
+  .homepage-container {
+    padding-top: 1.5rem;
+  }
+}
+
+.page-wrapper-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - var(--navbar-h));
+  padding: 2rem 0;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1024px) {
@@ -1914,7 +2096,7 @@ select.form-control {
 
 @media (max-width: 768px) {
   :root {
-    --navbar-h: 70px;
+    --navbar-h: 66px;
   }
 
   .navbar {
@@ -1927,7 +2109,8 @@ select.form-control {
     left: auto;
     top: auto;
     transform: none;
-    height: 46px;
+    height: 48px;
+    margin: 0 auto;
   }
 
   .navbar-brand {
@@ -1979,11 +2162,26 @@ select.form-control {
   .admin-sidebar {
     width: 100%;
     height: auto;
-    position: relative;
-    top: 0;
-    padding: 1rem;
+    position: sticky;
+    top: var(--navbar-h);
+    z-index: 100;
+    padding: 0.75rem 1rem;
     border-right: none;
     border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Prevent text overflow on small devices */
+  .hero-title {
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .btn-lg {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
   }
 
   .sidebar-nav {
@@ -2024,29 +2222,108 @@ select.form-control {
   .control-panel {
     justify-content: center;
   }
-}
 
-@media (max-width: 480px) {
-  .navbar-logo-center {
-    height: 36px;
+  /* App-like toast for mobile */
+  #toast-container {
+    top: auto;
+    bottom: 1.5rem;
+    left: 1rem;
+    right: 1rem;
+    align-items: center;
   }
 
-  .navbar-links {
-    gap: 0.2rem;
+  .toast {
+    width: 100%;
+    max-width: none;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    animation: slideInUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Better touch targets */
+  .btn {
+    padding-top: 0.85rem;
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 1.85rem !important;
+    line-height: 1.25;
+    padding: 0 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem !important;
+    padding: 0 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .portal-grid {
+    margin-top: 2rem;
+    gap: 1.25rem;
+    padding: 0 1.25rem;
+    grid-template-columns: 1fr;
+  }
+
+  .portal-card {
+    padding: 2.25rem 1.25rem;
+    border-radius: 2rem;
+  }
+
+  .portal-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .portal-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .portal-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .navbar-logo-center {
+    height: 42px;
   }
 
   .navbar-links a,
   .navbar-links button {
-    padding: 0.3rem 0.4rem;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.45rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero-title {
+    font-size: 1.6rem !important;
   }
 
-  /* Target the View Live Vote button explicitly on tiny screens */
-  .navbar-links a[target="_blank"] {
-    display: none;
+  .portal-card {
+    padding: 1.75rem 1rem;
   }
 
-  .stat-card {
-    padding: 1.25rem;
+  .portal-icon {
+    font-size: 3rem;
+  }
+
+  .navbar-logo-center {
+    height: 36px;
   }
 }
