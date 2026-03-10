@@ -133,10 +133,10 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
-  background: #FFFFFF;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.02);
+  padding: 0 1.5rem;
+  background: #1b2a38;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-logo-center {
@@ -185,10 +185,8 @@ img {
   font-family: 'Outfit', sans-serif;
   font-weight: 800;
   font-size: 1.35rem;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FFFFFF;
+  text-decoration: none;
 }
 
 .navbar-brand .logo-icon {
@@ -204,7 +202,7 @@ img {
 }
 
 .navbar-links a {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.9rem;
   font-weight: 500;
   padding: 0.45rem 1rem;
@@ -213,8 +211,8 @@ img {
 }
 
 .navbar-links a:hover {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn,
@@ -227,8 +225,8 @@ img {
 }
 
 .navbar-links a.active {
-  color: var(--primary);
-  background: var(--primary-soft);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.15);
   font-weight: 600;
 }
 
