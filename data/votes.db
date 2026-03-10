@@ -1,3 +1,6 @@
+{"project_id":"vGjJM1EXc7Y7NPVo","ip_address":"::1","fingerprint":"fp_ue5lyn9ninpmmk5wrmh","timestamp":{"$$date":1773120081035},"_id":"H7RMY5gLv9HzTGRu"}
+{"project_id":"dqWwY06lINUfAjPh","ip_address":"::1","fingerprint":"fp_ue5lyn9ninpmmk5wrmh","timestamp":{"$$date":1773120075768},"_id":"J6RLacQbJTeALWw9"}
+{"project_id":"57iziwSuXxTj3n5z","ip_address":"::1","fingerprint":"fp_ue5lyn9ninpmmk5wrmh","timestamp":{"$$date":1773120078536},"_id":"L74KD6TuH92HSG1L"}
 {"$$indexCreated":{"fieldName":"ip_address","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"fingerprint","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"ip_address"}}

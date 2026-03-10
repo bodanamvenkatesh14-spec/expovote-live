@@ -72,7 +72,6 @@
         </div>
         <div class="navbar-links">
             <a href="/vote" class="active" id="nav-vote">Vote</a>
-            <a href="/voting-leaderboard" id="nav-lb">Leaderboard</a>
         </div>
     </nav>
 
@@ -119,9 +118,7 @@
                 <div class="status-banner">
                     <span class="status-banner-icon">🔒</span>
                     <h2>Voting is Currently Closed</h2>
-                    <p>The voting session hasn't started yet or has been closed by the organizers. Check the leaderboard
-                        for results.</p>
-                    <a href="/leaderboard" class="btn btn-primary btn-lg mt-2">📊 View Leaderboard</a>
+                    <p>The voting session hasn't started yet or has been closed by the organizers.</p>
                 </div>
             </div>
 
@@ -442,9 +439,8 @@
             document.getElementById('closed-state').innerHTML = `
       <div class="status-banner">
         <span class="status-banner-icon">🏆</span>
-        <h2 style="color:var(--gold);">Winner Declared!</h2>
-        <p>Voting has ended. The results are now available on the leaderboard.</p>
-        <a href="/leaderboard" class="btn btn-warning btn-lg mt-2">🎉 See Results</a>
+        <h2 style="color:var(--gold);">Voting has ended</h2>
+        <p>Thank you for participating!</p>
       </div>`;
             document.getElementById('closed-state').style.display = 'block';
         }

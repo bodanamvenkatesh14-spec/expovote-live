@@ -30,12 +30,19 @@
         }
 
         .panel-section {
-            display: none;
+            display: block;
+            margin-bottom: 4rem;
             animation: fadeIn 0.4s ease-out;
+            scroll-margin-top: 80px;
+            /* offset for fixed headers if any */
         }
 
         .panel-section.active {
             display: block;
+        }
+
+        .sidebar-link {
+            text-decoration: none;
         }
 
         /* Vote Feed Fixes */
@@ -73,22 +80,22 @@
         <!-- SIDEBAR -->
         <aside class="admin-sidebar" id="sidebar">
             <nav class="sidebar-nav">
-                <button class="sidebar-link active" data-target="panel-overview">
+                <a href="#panel-overview" class="sidebar-link active">
                     <span class="link-icon">📊</span> Overview
-                </button>
-                <button class="sidebar-link" data-target="panel-projects">
+                </a>
+                <a href="#panel-projects" class="sidebar-link">
                     <span class="link-icon">📁</span> Projects
-                </button>
-                <button class="sidebar-link" data-target="panel-judges">
+                </a>
+                <a href="#panel-judges" class="sidebar-link">
                     <span class="link-icon">⚖️</span> Judges
-                </button>
-                <button class="sidebar-link" data-target="panel-feed">
+                </a>
+                <a href="#panel-feed" class="sidebar-link">
                     <span class="link-icon">⚡</span> Feed
-                </button>
+                </a>
                 <div class="sidebar-divider"></div>
-                <button class="sidebar-link" data-target="panel-settings">
+                <a href="#panel-settings" class="sidebar-link">
                     <span class="link-icon">⚙️</span> Settings
-                </button>
+                </a>
             </nav>
         </aside>
 
@@ -375,16 +382,11 @@
             return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Sidebar Tabs
+        // Sidebar Anchor Links highlighting
         document.querySelectorAll('.sidebar-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                const target = e.currentTarget.dataset.target;
-                document.getElementById(target).classList.add('active');
-                if (target === 'panel-projects' || target === 'panel-overview') fetchStats();
-                if (target === 'panel-judges') fetchJudges();
             });
         });
 
@@ -735,6 +737,7 @@
         // Init
         checkAuth();
         fetchStats();
+        fetchJudges(); // Fetch judges on load since it's all on one page now
     </script>
 </body>
 

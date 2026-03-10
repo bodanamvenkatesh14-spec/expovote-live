@@ -611,14 +611,14 @@ app.post('/api/admin/reset', adminAuthMW, async (req, res) => {
 // =========================================================
 // PAGES
 // =========================================================
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote.html')));
-app.get('/vote', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote.html')));
-app.get('/voting-leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'voting-leaderboard.html')));
-app.get('/leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'leaderboard.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-app.get('/judge', (req, res) => res.sendFile(path.join(__dirname, 'public', 'judge-login.html')));
-app.get('/judge/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'judge-dashboard.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote', 'index.html')));
+app.get('/vote', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vote', 'index.html')));
+app.get('/voting-leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'voting-leaderboard', 'index.html')));
+app.get('/leaderboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'leaderboard', 'index.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'login', 'index.html')));
+app.get('/judge', (req, res) => res.sendFile(path.join(__dirname, 'public', 'judge', 'index.html')));
+app.get('/judge/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'judge', 'dashboard', 'index.html')));
 
 // =========================================================
 // SOCKET.IO
