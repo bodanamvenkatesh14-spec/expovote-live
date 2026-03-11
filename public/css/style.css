@@ -184,7 +184,7 @@ img {
   max-width: 100%;
   object-fit: contain;
   mix-blend-mode: multiply;
-  filter: contrast(1.15) brightness(1.05);
+  filter: contrast(1.22) brightness(1.12);
 }
 
 .navbar-brand {
